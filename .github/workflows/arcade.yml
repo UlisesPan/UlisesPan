@@ -1,0 +1,33 @@
+name: Arcade · commits como videojuego
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # todos los días a las 3:00 UTC (00:00 Argentina)
+  workflow_dispatch: # permite correrlo a mano desde la pestaña Actions
+  push:
+    branches: [main]
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      # Genera Pac-Man, Snake y Tetris jugando sobre tu grilla de contribuciones.
+      # Salida: dist/<juego>-contribution-graph.svg y dist/<juego>-contribution-graph-dark.svg
+      - name: Generar juegos a partir de las contribuciones
+        uses: abozanona/pacman-contribution-graph@main
+        with:
+          github_user_name: ${{ github.repository_owner }}
+          games: "pacman,snake,tetris"
+          player_style: opportunistic
+
+      # Publica los SVG en la rama "output" (no ensucia main)
+      - name: Publicar SVGs en la rama output
+        uses: crazy-max/ghaction-github-pages@v4
+        with:
+          target_branch: output
+          build_dir: dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
